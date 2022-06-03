@@ -1,0 +1,14 @@
+{
+    "name": "thisispiers/xss-escape",
+    "description": "A PHP implementation of OWASP Cross Site Scripting Prevention Cheat Sheet",
+    "license": "LGPL-3.0-only",
+    "require": {
+        "php": ">=7.1",
+        "ext-mbstring": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "thisispiers\\Xss\\": ""
+        }
+    }
+}
