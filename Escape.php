@@ -37,7 +37,7 @@ class Escape
                 if ($format === 'html') {
                     $encoded_data .= '&#x' . $hex . ';';
                 } else if ($format === 'unicode') {
-                    $encoded_data .= '\\u' . $ord;
+                    $encoded_data .= '\\u{' . $hex . '}';
                 } else if ($format === 'css') {
                     $hex = str_pad($hex, 6, '0', \STR_PAD_LEFT);
                     $encoded_data .= '\\' . $hex;
