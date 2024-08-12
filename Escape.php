@@ -6,7 +6,7 @@
  * @package thisispiers\Xss
  * @link https://github.com/thisispiers/xss-escape
  * @see https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
- * Last retrieved: 2021-11-04
+ * Last retrieved: 2024-08-20
  */
 
 namespace thisispiers\Xss;
@@ -27,10 +27,10 @@ class Escape
             $char = mb_substr($untrusted_data, $i, 1, 'UTF-8');
             $ord = mb_ord($char);
             if (
-                $ord >= 256
-                || ($ord >= 48 && $ord <= 57)
-                || ($ord >= 65 && $ord <= 90)
-                || ($ord >= 97 && $ord <= 122)
+                $ord >= 256 // non-ASCII
+                || ($ord >= 48 && $ord <= 57) // 0-9
+                || ($ord >= 65 && $ord <= 90) // A-Z
+                || ($ord >= 97 && $ord <= 122) // a-z
             ) {
                 $encoded_data .= $char;
             } else {
@@ -159,9 +159,9 @@ class Escape
      * e.g. <iframe src="UNTRUSTED URL" />
      * e.g. <a href="UNTRUSTED URL">link</a>
      *
-     * Whitelist https URLs only
+     * Allow https URLs only
      *
-     * Apply additional whitelisting, canonicalization and anti-virus checks
+     * Apply additional validation, canonicalization and anti-virus checks
      * depending on the use-case
      *
      * @throws \InvalidArgumentException if data cannot be converted to a string
