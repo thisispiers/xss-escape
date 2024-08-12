@@ -131,8 +131,19 @@ class Escape
             $validated = static::validateUrl($untrusted_data);
         }
 
-        $encoded_data = static::encode($untrusted_data, 'html');
+        $encoded_data = static::htmlAttrValue($untrusted_data);
         return $wrap ? ' ' . $attr . '="' . $encoded_data . '"' : $encoded_data;
+    }
+
+    /**
+     * Context: HTML attribute values
+     * e.g. <div class="class1 class2 UNTRUSTED DATA">
+     *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
+     */
+    public static function htmlAttrValue(mixed $untrusted_data): string
+    {
+        return static::encode($untrusted_data, 'html');
     }
 
     /**
