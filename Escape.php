@@ -91,12 +91,8 @@ class Escape
      * Context: Safe HTML attributes
      * e.g. <input type="text" name="field_name" value="UNTRUSTED DATA">
      *
-     * Limit to whitelisted attributes:
-     *     align, alink, alt, bgcolor, border, cellpadding, cellspacing, class,
-     *     color, cols, colspan, coords, dir, face, height, hspace, ismap, lang,
-     *     marginheight, marginwidth, multiple, nohref, noresize, noshade,
-     *     nowrap, ref, rel, rev, rows, rowspan, scrolling, shape, span, summary,
-     *     tabindex, title, usemap, valign, value, vlink, vspace, width.
+     * Limit to safe attributes
+     * @link https://github.com/cure53/DOMPurify/blob/main/src/attrs.js
      *
      * Except for alphanumeric characters, escape all characters with the
      * &#xHH; HTML entity format, including spaces
@@ -106,14 +102,26 @@ class Escape
      * @throws \InvalidArgumentException if the attribute is not considered safe
      * @throws \InvalidArgumentException if data cannot be converted to a string
      */
-    public const HTML_ATTR_WHITELIST = [
-        'align', 'alink', 'alt', 'bgcolor', 'border', 'cellpadding',
-        'cellspacing', 'class', 'color', 'cols', 'colspan', 'coords', 'dir',
-        'face', 'height', 'hspace', 'ismap', 'lang', 'marginheight',
-        'marginwidth', 'multiple', 'nohref', 'noresize', 'noshade', 'nowrap',
-        'ref', 'rel', 'rev', 'rows', 'rowspan', 'scrolling', 'shape', 'span',
-        'summary', 'tabindex', 'title', 'usemap', 'valign', 'value', 'vlink',
-        'vspace', 'width',
+    public const HTML_ATTRS_ALLOWED = [
+        'accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete',
+        'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border',
+        'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class',
+        'clear', 'color', 'cols', 'colspan', 'controls', 'controlslist',
+        'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir',
+        'disabled', 'disablepictureinpicture', 'disableremoteplayback',
+        'download', 'draggable', 'enctype', 'enterkeyhint', 'face', 'for',
+        'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id',
+        'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list',
+        'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min',
+        'minlength', 'multiple', 'muted', 'name', 'nonce', 'noshade',
+        'novalidate', 'nowrap', 'open', 'optimum', 'pattern', 'placeholder',
+        'playsinline', 'popover', 'popovertarget', 'popovertargetaction',
+        'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel',
+        'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck',
+        'scope', 'selected', 'shape', 'size', 'sizes', 'span', 'srclang',
+        'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex',
+        'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width',
+        'wrap', 'xmlns', 'slot',
 
         'href', 'src',
     ];
@@ -123,8 +131,8 @@ class Escape
         bool $wrap = true
     ): string {
         $attr = mb_strtolower($attr);
-        if (!in_array($attr, static::HTML_ATTR_WHITELIST, true)) {
-            throw new \InvalidArgumentException('HTML attribute is not whitelisted');
+        if (!in_array($attr, static::HTML_ATTRS_ALLOWED, true)) {
+            throw new \InvalidArgumentException('HTML attribute is not allowed');
         }
         $untrusted_data = static::stringOrThrow($untrusted_data);
         if ($attr === 'href' || $attr === 'src') {
