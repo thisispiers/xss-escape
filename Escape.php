@@ -4,7 +4,7 @@
  * A PHP implementation of OWASP Cross Site Scripting Prevention Cheat Sheet
  *
  * @package thisispiers\Xss
- * @url https://github.com/thisispiers/xss-escape
+ * @link https://github.com/thisispiers/xss-escape
  * @see https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
  * Last retrieved: 2021-11-04
  */
@@ -101,6 +101,8 @@ class Escape
      * &#xHH; HTML entity format, including spaces
      *
      * Apply additional validation to href and src attributes
+     *
+     * @throws \InvalidArgumentException if the attribute is not considered safe
      */
     public const HTML_ATTR_WHITELIST = [
         'align', 'alink', 'alt', 'bgcolor', 'border', 'cellpadding',
@@ -139,6 +141,8 @@ class Escape
      *
      * Apply additional whitelisting, canonicalization and anti-virus checks
      * depending on the use-case
+     *
+     * @throws \InvalidArgumentException if the URL protocol is not HTTPS
      */
     public static function validateUrl(mixed $untrusted_data): bool
     {
@@ -192,6 +196,11 @@ class Escape
      *
      * Except for alphanumeric characters, escape all characters with the
      * %HH escaping format
+     *
+     * If using URL in an href or other HTML attribute, remember to also encode
+     * using htmlAttr()
+     *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      */
     public static function urlParam(mixed $untrusted_data): string
     {
@@ -209,6 +218,7 @@ class Escape
      * Output JSON inside a hidden element before calling JSON.parse(el.textContent)
      *
      * @param mixed $untrusted_data
+     * @throws \JsonException if there was an error during encoding
      */
     public static function jsonInHtml(mixed $untrusted_data): string
     {
