@@ -13,13 +13,14 @@ namespace thisispiers\Xss;
 
 class Escape
 {
+    /**
+     * @throws \InvalidArgumentException if data cannot be converted to a string
+     */
     public static function encode(
         mixed $untrusted_data,
         string $format
     ): string {
-        if (!is_string($untrusted_data)) {
-            $untrusted_data = strval($untrusted_data);
-        }
+        $untrusted_data = static::stringOrThrow($untrusted_data);
         $encoded_data = '';
         $untrusted_data_length = mb_strlen($untrusted_data, 'UTF-8');
         for ($i = 0; $i < $untrusted_data_length; $i++) {
@@ -60,12 +61,12 @@ class Escape
      *     > to &gt;
      *     " to &quot;
      *     ' to &#x27;
+     *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      */
     public static function htmlBody(mixed $untrusted_data): string
     {
-        if (!is_string($untrusted_data)) {
-            $untrusted_data = strval($untrusted_data);
-        }
+        $untrusted_data = static::stringOrThrow($untrusted_data);
         $untrusted_data = str_replace('&', '&amp;',  $untrusted_data);
         $untrusted_data = str_replace('<', '&lt;',   $untrusted_data);
         $untrusted_data = str_replace('>', '&gt;',   $untrusted_data);
@@ -103,6 +104,7 @@ class Escape
      * Apply additional validation to href and src attributes
      *
      * @throws \InvalidArgumentException if the attribute is not considered safe
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      */
     public const HTML_ATTR_WHITELIST = [
         'align', 'alink', 'alt', 'bgcolor', 'border', 'cellpadding',
@@ -124,6 +126,7 @@ class Escape
         if (!in_array($attr, static::HTML_ATTR_WHITELIST, true)) {
             throw new \InvalidArgumentException('HTML attribute is not whitelisted');
         }
+        $untrusted_data = static::stringOrThrow($untrusted_data);
         if ($attr === 'href' || $attr === 'src') {
             $validated = static::validateUrl($untrusted_data);
         }
@@ -142,13 +145,12 @@ class Escape
      * Apply additional whitelisting, canonicalization and anti-virus checks
      * depending on the use-case
      *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      * @throws \InvalidArgumentException if the URL protocol is not HTTPS
      */
     public static function validateUrl(mixed $untrusted_data): bool
     {
-        if (!is_string($untrusted_data)) {
-            $untrusted_data = strval($untrusted_data);
-        }
+        $untrusted_data = static::stringOrThrow($untrusted_data);
         $protocol = mb_substr($untrusted_data, 0, 8);
         if ($protocol !== 'https://') {
             throw new \InvalidArgumentException('URL is not HTTPS');
@@ -171,6 +173,8 @@ class Escape
      * \uXXXX unicode escaping format
      *
      * Avoid backslash encoding
+     *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      */
     public static function jsVar(mixed $untrusted_data): string
     {
@@ -183,6 +187,8 @@ class Escape
      * e.g. <div style="width: UNTRUSTED DATA;">
      *
      * CSS escaping supports \XX and \XXXXXX. Zero-pad to 6 characters
+     *
+     * @throws \InvalidArgumentException if data cannot be converted to a string
      */
     public static function cssValue(mixed $untrusted_data): string
     {
@@ -225,4 +231,25 @@ class Escape
         $flags = \JSON_HEX_AMP|\JSON_HEX_TAG|\JSON_HEX_QUOT|\JSON_HEX_APOS|\JSON_THROW_ON_ERROR;
         return json_encode($untrusted_data, $flags) ?: '[]';
     }
+
+    /**
+     * @throws \InvalidArgumentException if the variable cannot be converted to
+     *                                   a string
+     */
+    protected static function stringOrThrow(mixed $var): string
+    {
+        if (
+            is_string($var)
+            || $var instanceof \Stringable
+            || is_int($var)
+            || is_float($var)
+            || $var === null
+        ) {
+            return strval($var);
+        } else {
+            $msg = 'Variable must be a string or convertible to a string';
+            throw new \InvalidArgumentException($msg);
+        }
+    }
+
 }
